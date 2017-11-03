@@ -10,7 +10,6 @@ import pandas as pd
 
 dummy_sensor_name = '__DUMMY_SENSOR_UNDETECTED__'
 
-
 class Pmedian(object):
     """
     Pyomo-based Pmedian sensor placement optimization.
