@@ -50,7 +50,6 @@ class Grid(object):
             return None
 
         if self._grid_open[xi, yi, zi]:
-            print(xk,yk,zk,':',xi,yi,zi)
             return (xi, yi, zi)
 
         return None
