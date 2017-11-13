@@ -3,6 +3,7 @@ from nose.plugins.skip import SkipTest
 import chama.ray_cast as rc
 import math
 from pyutilib.misc import timing
+import numpy as np
 
 def test_ray_cast():
     grid = rc.Grid(xu=100.0, yu=100.0, zu=50.0, nx=5, ny=5, nz=2)
@@ -10,13 +11,14 @@ def test_ray_cast():
     print(grid._y)
     print(grid._z)
 
-    grid.add_obstacle(0,3,0)
-    grid.add_obstacle(1,2,0)
+    grid.add_obstacle(0,4,0)
+    grid.add_obstacle(1,3,0)
 
-    intersect = rc.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/2.0, math.pi/2.0) # 90 deg
-    intersect.update(rc.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/2.0, 0.0)) # 0 deg
-    intersect.update(rc.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/2.0, math.pi/4.0)) # 0 deg)
-    intersect.update(rc.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/4.0, 0.0)) # 0 deg)
+    intersect = rc.get_ray_intersections(grid, 25.0, 25.0, 10.0, theta_deg = 0.0, horizon_deg = 0.0) # right deg
+    intersect.update(rc.get_ray_intersections(grid, 25.0, 25.0, 10.0, theta_deg = 90.0, horizon_deg = 0.0)) # forward deg
+    intersect.update(rc.get_ray_intersections(grid, 25.0, 25.0, 10.0, theta_deg = 180.0, horizon_deg = 0.0)) # left deg
+    intersect.update(rc.get_ray_intersections(grid, 25.0, 25.0, 10.0, theta_deg = 270.0, horizon_deg = 0.0)) # backward deg
+    intersect.update(rc.get_ray_intersections(grid, 25.0, 25.0, 10.0, theta_deg = 0.0, horizon_deg = 45.0)) # right and up slightly
 
     grid.print_grid(intersect)
 
@@ -37,16 +39,14 @@ def test_ray_cast_performance():
 
     timing.tic()
     camera_intersect = dict()
-    for cam_xc in range(0,141):
-        print('... camera at ({}, {}, {})'.format(cam_xc, 0, 0))
-        camera_intersect_i = set()
-        for ang_deg in range(60,121):
-            ang_rad = float(ang_deg)*math.pi/360.0
-            intersect = rc.get_ray_intersections(grid, float(cam_xc), 0.0, 0.0, math.pi/2.0, ang_deg)
-            camera_intersect_i.update(intersect)
-        camera_intersect[(cam_xc, 0, 0)] = camera_intersect_i
+    for xc in np.linspace(0,140,num=14):
+        for yc in np.linspace(0, 140, num=14):
+            for ang in [0.0, 90.0, 180.0, 270.0]:
+                camera_intersect[(xc,yc,ang)] = \
+                    rc.get_camera_intersections(grid, xc, yc, 10.0, ang, 0.0, 60.0, 30.0, n_theta=30, n_horizon=1, dist_step=0.25)
+
     timing.toc()
-    print(camera_intersect[25,0,0])
+#    print(camera_intersect[25,0,0])
 
 if __name__ == '__main__':
     test_ray_cast_performance()
