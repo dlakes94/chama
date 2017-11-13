@@ -1,14 +1,24 @@
-import ray_trace as rt
+from nose.tools import *
+from nose.plugins.skip import SkipTest
+import chama.ray_trace as rt
 import math
 
-grid = rt.Grid(100.0,100.0,100.0, 5)
-print(grid._x)
-print(grid._y)
-print(grid._z)
+def test_ray_trace():
+    grid = rt.Grid(xu=100.0, yu=100.0, zu=50.0, nx=5, ny=5, nz=2)
+    print(grid._x)
+    print(grid._y)
+    print(grid._z)
 
-grid.add_obstacle(0,3,0)
-print(grid._grid_open)
+    grid.add_obstacle(0,3,0)
+    grid.add_obstacle(1,2,0)
 
-intersect = rt.get_grid_intersections(grid, 15.0, 15.0, 15.0, 0.0, math.pi/2.0) # 90 deg
+    intersect = rt.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/2.0, math.pi/2.0) # 90 deg
+    intersect.update(rt.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/2.0, 0.0)) # 0 deg
+    intersect.update(rt.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/2.0, math.pi/4.0)) # 0 deg)
+    intersect.update(rt.get_ray_intersections(grid, 10.0, 10.0, 10.0, math.pi/4.0, 0.0)) # 0 deg)
 
-print(intersect)
+    grid.print_grid(intersect)
+
+if __name__ == '__main__':
+    test_ray_trace()
+

@@ -3,6 +3,7 @@ from chama import sensors
 from chama import impact
 from chama import optimize
 from chama import graphics
+from chama import ray_trace
 
 __version__ = '0.1.0'
 
