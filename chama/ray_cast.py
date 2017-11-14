@@ -125,6 +125,6 @@ def get_camera_intersections(grid, x, y, z, theta_deg, horizon_deg, theta_fov, h
     for theta_deg_i in np.linspace(theta_deg - theta_fov / 2.0, theta_deg + theta_fov / 2.0, num=n_theta):
         for horizon_deg_i in np.linspace(horizon_deg - horizon_fov / 2.0, horizon_deg + horizon_fov / 2.0, num=n_horizon):
             intersect = get_ray_intersections(grid, x, y, z, theta_deg=theta_deg_i, horizon_deg=horizon_deg_i, step=dist_step)
-            camera_intersect.update(intersect)
+            camera_intersect.update(intersect) 
 
         
