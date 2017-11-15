@@ -120,11 +120,12 @@ def get_ray_intersections(grid, x, y, z, theta_deg, horizon_deg, step=0.1):
 
 
 def get_camera_intersections(grid, x, y, z, theta_deg, horizon_deg, theta_fov, horizon_fov, n_theta=10, n_horizon=10, dist_step=0.1):
-    print('... computing intersections for camera at ({}, {}, {}) with angles = ({},{})'.format(x, y, z, theta_deg, horizon_deg))
+    # print('... computing intersections for camera at ({}, {}, {}) with angles = ({},{})'.format(x, y, z, theta_deg, horizon_deg))
     camera_intersect = set()
     for theta_deg_i in np.linspace(theta_deg - theta_fov / 2.0, theta_deg + theta_fov / 2.0, num=n_theta):
         for horizon_deg_i in np.linspace(horizon_deg - horizon_fov / 2.0, horizon_deg + horizon_fov / 2.0, num=n_horizon):
             intersect = get_ray_intersections(grid, x, y, z, theta_deg=theta_deg_i, horizon_deg=horizon_deg_i, step=dist_step)
             camera_intersect.update(intersect) 
+    return camera_intersect
 
         
