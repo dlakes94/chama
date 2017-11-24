@@ -1,11 +1,11 @@
+from __future__ import print_function
 from nose.tools import *
 from nose.plugins.skip import SkipTest
 import chama.ray_cast as rc
 import math
 from pyutilib.misc import timing
 import numpy as np
-
-
+import pandas as pd
 
 def test_ray_cast():
     grid = rc.Grid(xu=100.0, yu=100.0, zu=50.0, nx=5, ny=5, nz=2)
@@ -24,40 +24,6 @@ def test_ray_cast():
 
     grid.print_grid(intersect)
 
-    grid.plotly_plot_grid()
-
-def test_ray_cast_small():
-    grid = rc.Grid(xu=2, yu=2, zu=5, nx=1, ny=1, nz=1)
-    grid.plotly_plot_grid()
-
-def test_ray_cast_viz():
-    ###
-    # define the tank farm
-    ###
-    grid = rc.Grid(xu=14.0, yu=14.0, zu=5.0, nx=14, ny=14, nz=5)
-    # define tanks at 30, and 70 and 110 with a "radius" of 10 blocks
-    for xc in [3.0, 7.0, 11.0]:
-        for yc in [3.0, 7.0, 11.0]:
-            for xcd in range(-1,2):
-                for ycd in range(-1,2):
-                    for zd in range(0,4):
-                        grid.add_obstacle(xc+xcd, yc+ycd, zd)
-
-#    grid.plotly_plot_grid()
-#    quit()
-    #grid.print_grid([])
-
-    timing.tic()
-    camera_intersect = dict()
-    for xc in np.linspace(0,14,num=14):
-        for yc in np.linspace(0, 14, num=14):
-            for ang in [0.0, 90.0, 180.0, 270.0]:
-                camera_intersect[(xc,yc,ang)] = \
-                    rc.get_camera_intersections(grid, xc, yc, 1.0, ang, 0.0, 60.0, 30.0, n_theta=30, n_horizon=1, dist_step=0.25)
-
-    timing.toc()
-#    print(camera_intersect[25,0,0])
-
 def test_ray_cast_performance():
     ###
     # define the tank farm
@@ -71,21 +37,69 @@ def test_ray_cast_performance():
                     for zd in range(0,31):
                         grid.add_obstacle(xc+xcd, yc+ycd, zd)
 
-    grid.plotly_plot_grid()
-    quit()
-    #grid.print_grid([])
+    # print(type(grid._grid_open))
+    df_grid = pd.DataFrame(columns=['Grid','Open'])
+    df_grid['Grid'] = grid._grid_open.keys()
+    df_grid['Open'] = grid._grid_open.values()
+    print(df_grid)
 
     timing.tic()
     camera_intersect = dict()
-    for xc in np.linspace(0,140,num=14):
-        for yc in np.linspace(0, 140, num=14):
+    z = 10.0
+    for xc in np.linspace(0,1,num=2):
+        for yc in np.linspace(0, 1, num=2):
+            camera_intersect[(xc,yc,z)] = {}
             for ang in [0.0, 90.0, 180.0, 270.0]:
-                camera_intersect[(xc,yc,ang)] = \
-                    rc.get_camera_intersections(grid, xc, yc, 10.0, ang, 0.0, 60.0, 30.0, n_theta=30, n_horizon=1, dist_step=0.25)
+                camera_intersect[(xc,yc,z)][ang] = \
+                    rc.get_camera_intersections(grid, xc, yc, z, ang, 0.0, 60.0, 30.0, n_theta=30, n_horizon=1, dist_step=0.25)
 
+
+
+
+    df = pd.DataFrame(camera_intersect,columns=camera_intersect.keys()).T
+    set_grid = [(x,y,z) for x in range(0,140) for y in range(0,140) for z in range(0,50)]
+    set_locations = df.index
+    set_angles = df.columns
+    # print(df)
+    # print(df.columns)
+    # print(df.index)
+
+    out_loc = []
+    out_dir = []
+    out_obs = []
+    # for loc in set_locations:
+    #     d = set_angles
+    #     v = [loc] * len(d)
+    #     out_loc+=v
+    #     out_dir+=d
+    #     out_obs+=camera_intersect[loc].values()
+    # for i in camera_intersect[(0,1,10)][0]:
+    #     print(i)
+    for loc in set_locations:
+        for ang in set_angles:
+            for val in camera_intersect[loc][ang]:
+                out_loc.append(loc)
+                out_dir.append(ang)
+                out_obs.append(val)
+
+    df2 = pd.DataFrame(columns=['Location','Direction','Observed'])
+    df2['Location'] = out_loc
+    df2['Direction'] = out_dir
+    df2['Observed'] = out_obs
+    print(df2)
+
+
+    # file = 'test_ray_cast_data.py'
+    # with open(file,'w+') as outfile:
+    #     print('set_grid = ',set_grid, file=outfile)
+    #     print('set_locations = ',set_locations, file=outfile)
+    #     print('set_angles = ',set_angles, file=outfile)
+    #     print('camera_intersect = ',camera_intersect, file=outfile)
+    df_grid.to_csv('~/repositories/lairdrepo/users/tzhen/FireDetector/grid_data.csv')
+    df2.to_csv('~/repositories/lairdrepo/users/tzhen/FireDetector/test_ray_cast_data.csv')
     timing.toc()
 #    print(camera_intersect[25,0,0])
 
 if __name__ == '__main__':
-    test_ray_cast_viz()
+    test_ray_cast_performance()
 
