@@ -30,8 +30,14 @@ class Grid(object):
         self._dy = yu/float(ny)
         self._dz = zu/float(nz)
         self._grid_open = dict()
-        for (i,j,k) in np.ndindex(len(self._x), len(self._y), len(self._z)):
+        for (i,j,k) in np.ndindex(len(self._x)-1, len(self._y)-1, len(self._z)-1):
             self._grid_open[(i,j,k)] = True
+
+    def get_all_grid_ijk(self):
+        grid_ijk = list()
+        for (i,j,k) in np.ndindex(len(self._x)-1, len(self._y)-1, len(self._z)-1):
+            grid_ijk.append((i,j,k))
+        return grid_ijk
 
     def add_obstacle(self, i, j, k):
         ''' Specify a particular grid "cube" to be an "obstacle" in terms of integer segment counts in x, y, and z.'''
