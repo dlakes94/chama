@@ -5,6 +5,7 @@ import itertools
 import plotly
 import plotly.graph_objs as go
 from plotly.graph_objs import Scatter, Layout, Scatter3d, Mesh3d
+import plotly.plotly as py
 
 class Grid(object):
     ''' Specifies a 3D geometry for use in ray-casting to determine what grid "cubes" cameras can and cannot see.
@@ -94,6 +95,68 @@ class Grid(object):
 
         return None
 
+    def plotly_2d_grid(self, ij_list=None):
+        shapes = list()
+
+        for (i, j) in np.ndindex(len(self._x) - 1, len(self._y) - 1):
+            color = 'rgba(204, 204, 204, 0.3)'
+            if self._grid_open[(i, j, 0)] == False:
+                color = 'rgba(51, 51, 51, 1.0)'
+            shape = {
+                        'type': 'rect',
+                        'x0': self._x[i],
+                        'y0': self._y[j],
+                        'x1': self._x[i]+self._dx,
+                        'y1': self._y[j]+self._dy,
+                        'fillcolor': color,
+                        'line': {
+                            'width': 0
+                        }
+                        #'color': 'rgba(128, 0, 128, 1)',
+                        #}
+            }
+            shapes.append(shape)
+
+        if ij_list is not None:
+            for (i, j, color) in ij_list:
+                shape = {
+                        'type': 'rect',
+                        'x0': self._x[i],
+                        'y0': self._y[j],
+                        'x1': self._x[i]+self._dx,
+                        'y1': self._y[j]+self._dy,
+                        'fillcolor': color,
+                        'line': {
+                            'width': 0
+                        }
+                        #'color': 'rgba(128, 0, 128, 1)',
+                        #}
+                }
+                shapes.append(shape)
+
+#            objs = _plotly_cube_mesh(self._x[i], self._y[j], self._z[k],
+#                                     self._dx, self._dy, self._dz,
+#                                     include_mesh=include_mesh,
+#                                     opacity=opacity,
+#                                     include_lines=True)
+
+        trace0 = go.Scatter(
+            x=[1.5, 3],
+            y=[2.5, 2.5],
+            text=[''],
+            mode='text',
+        )
+        layout = {
+            'shapes': shapes
+        }
+        plt = plotly.offline.plot({
+            "data": [trace0],
+            "layout": layout,
+            })
+
+
+
+
     def plotly_plot_grid(self):
         cubes=list()
         for (i,j,k) in np.ndindex(len(self._x)-1, len(self._y)-1, len(self._z)-1):
@@ -154,12 +217,16 @@ class Grid(object):
             ),
         )
 
-        plt = plotly.offline.plot({
-            "data": cubes,
-            "layout": layout
-        })
+        #plt = plotly.offline.plot({
+        #    "data": cubes,
+        #    "layout": layout,
+        #    })
 
-        print(plt)
+        py.image.save_as({
+            "data": cubes,
+            "layout": layout,
+            }, filename='a-simple-plot.png')
+        #print(plt)
 
 def _plotly_cube_faces():
     p = [(0,0,0), (1,0,0), (1,1,0), (0,1,0), (0,0,1), (1,0,1), (1,1,1), (0,1,1)]
@@ -214,7 +281,6 @@ def _plotly_cube_mesh(x, y, z, dx, dy, dz, include_mesh=False, opacity=0.5, incl
             objs.append(line)
 
     return objs
-
 
 def _plotly_cube_objects(x, y, z, style='line', color='#1f77b4', opacity=1.0):
     objs = list()
@@ -303,4 +369,4 @@ def get_camera_intersections(grid, x, y, z, theta_deg, theta_deg_space, horizon_
             intersect = get_ray_intersections(grid, x, y, z, theta_deg=theta_deg_i, horizon_deg=horizon_deg_i, step=dist_step)
             camera_intersect.update(intersect)
 
-        
+    return camera_intersect
