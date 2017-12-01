@@ -95,7 +95,7 @@ class Grid(object):
 
         return None
 
-    def plotly_2d_grid(self, ij_list=None):
+    def plotly_2d_grid(self, filename, ij_list=None, range=None):
         shapes = list()
 
         for (i, j) in np.ndindex(len(self._x) - 1, len(self._y) - 1):
@@ -146,13 +146,21 @@ class Grid(object):
             text=[''],
             mode='text',
         )
-        layout = {
-            'shapes': shapes
-        }
+        if range is None:
+            layout = go.Layout(shapes=shapes)
+        else:
+            layout = go.Layout(shapes=shapes,
+                               xaxis={'range': range['x']},
+                               yaxis = {'range': range['y']}
+                               )
+#        layout = {
+#            'shapes': shapes
+#        }
         plt = plotly.offline.plot({
             "data": [trace0],
             "layout": layout,
-            })
+            },
+        filename=filename)
 
 
 
